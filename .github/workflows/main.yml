@@ -1,0 +1,32 @@
+name: Build C++ WinForms App
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-2022
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Giải nén file ZIP
+      # Lệnh này sẽ tự động giải nén file JellyPost-WinForms.zip ngay trên máy chủ
+      run: Expand-Archive -Path "JellyPost-WinForms.zip" -DestinationPath . -Force
+
+    - name: Cài đặt MSBuild
+      uses: microsoft/setup-msbuild@v2
+
+    - name: Build the Solution
+      # Truy cập vào thư mục vừa giải nén để chạy file .sln
+      run: msbuild JellyPostWinForms/JellyPost.sln /p:Configuration=Release /p:Platform=x64
+
+    - name: Trích xuất file EXE
+      uses: actions/upload-artifact@v4
+      with:
+        name: JellyPost-Compiled-App
+        # Lấy file thực thi từ thư mục x64/Release
+        path: JellyPostWinForms/x64/Release/
